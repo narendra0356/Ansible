@@ -1,0 +1,3 @@
+[jenkinsGroup1]
+jenkins ansible_host=34.229.10.22 ansible_user=root
+
