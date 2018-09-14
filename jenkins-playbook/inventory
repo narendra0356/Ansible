@@ -1,3 +1,3 @@
 [jenkinsGroup1]
-jenkins ansible_host=52.91.172.6 ansible_user=root
+jenkins ansible_host=34.239.104.99 ansible_user=root
 
