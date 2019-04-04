@@ -1,1 +1,2 @@
 Hello Rishi
+This is modified file for git-ftp
