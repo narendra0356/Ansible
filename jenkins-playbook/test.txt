@@ -1,2 +1,3 @@
 Hello Rishi
 This is modified file for git-ftp
+Pass the parameter values
