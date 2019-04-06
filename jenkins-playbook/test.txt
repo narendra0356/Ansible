@@ -1,3 +1,4 @@
 Hello Rishi
 This is modified file for git-ftp
 Pass the parameter values
+Merge the staging and master repos
