@@ -35,12 +35,52 @@
       systemd:
         name: jenkins
         enabled: true
+
     - name: sleep for 30 seconds and continue with play
       wait_for: timeout=30
       delegate_to: localhost
 
+    - name: Insatll the apache
+      yum: 
+        name: httpd 
+        state: present 
+    
+    - name: Configue the httpd.conf file
+      blockinfile:
+        dest: /etc/httpd/conf/httpd.conf
+        block: |
+           ProxyPass /jenkins http://localhost:8080/jenkins nocanon
+           ProxyPassReverse jenkins http://localhost:8080/jenkins 
+           ProxyRequests off 
+           AllowEncodedSlashes NoDecode
+        insertbefore: EOF
+ 
+    - name: Set the ip tables
+      shell: |
+           iptables -I INPUT 1 -p tcp --dport 8443 -j ACCEPT
+           iptables -I INPUT 1 -p tcp --dport 8080 -j ACCEPT
+           iptables -I INPUT 1 -p tcp --dport 443 -j ACCEPT
+           iptables -I INPUT 1 -p tcp --dport 80 -j ACCEPT   
+           iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080
+           iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 8443
+           firewall-cmd --add-port=80/tcp --permanent
+           firewall-cmd --add-port=443/tcp --permanent
+           setsebool  httpd_can_network_connect true
+           setsebool  httpd_can_network_connect 1  
+    - name: Configure Jenkins Prefix 
+      lineinfile:
+         dest: /etc/sysconfig/jenkins
+         regexp: ^PREFIX=
+         line: PREFIX=--prefix==/jenkins
+      register: config_changed
+    
+    - name: Restart jenkins/httpd service
+      service: name=jenkins state=restarted
+      service: name=httpd state=restarted
+      when: config_changed.changed
+
     - name:  Access the Jenkins UI through Url
-      shell: echo `curl ifconfig.co`:8080
+      shell: echo `curl ifconfig.co`/jenkins
       changed_when: false
       register: results
 
